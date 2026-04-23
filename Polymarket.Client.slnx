@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/examples/">
+    <Project Path="examples/Polymarket.Client.ConsoleApp/Polymarket.Client.ConsoleApp.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Polymarket.Client/Polymarket.Client.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Polymarket.Client.Tests/Polymarket.Client.Tests.csproj" />
+  </Folder>
+</Solution>
