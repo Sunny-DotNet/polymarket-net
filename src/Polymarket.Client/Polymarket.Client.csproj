@@ -7,9 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nethereum.ABI" />
-    <PackageReference Include="Nethereum.Signer" />
-    <PackageReference Include="Nethereum.Signer.EIP712" />
-    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="BouncyCastle.Cryptography" />
   </ItemGroup>
 </Project>
