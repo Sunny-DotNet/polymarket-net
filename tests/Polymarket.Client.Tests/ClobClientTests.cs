@@ -157,6 +157,209 @@ public sealed class ClobClientTests
     }
 
     [Fact]
+    public async Task GetMarketsAsync_ReturnsStronglyTypedMarkets()
+    {
+        using HttpClient httpClient = new(new StubHttpMessageHandler(request =>
+        {
+            return request.RequestUri!.AbsolutePath switch
+            {
+                "/markets" => CreateJsonResponse(
+                    """
+                    {
+                      "limit": 1,
+                      "count": 1,
+                      "next_cursor": "LTE=",
+                      "data": [
+                        {
+                          "enable_order_book": true,
+                          "active": true,
+                          "closed": false,
+                          "archived": false,
+                          "accepting_orders": true,
+                          "accepting_order_timestamp": "2025-01-01T00:00:00Z",
+                          "minimum_order_size": 5,
+                          "minimum_tick_size": 0.01,
+                          "condition_id": "c1",
+                          "question_id": "q1",
+                          "question": "Will it rain?",
+                          "description": "Rain market",
+                          "market_slug": "will-it-rain",
+                          "end_date_iso": "2025-01-02T00:00:00Z",
+                          "game_start_time": null,
+                          "seconds_delay": 0,
+                          "fpmm": "0xabc",
+                          "maker_base_fee": 0,
+                          "taker_base_fee": 0,
+                          "notifications_enabled": true,
+                          "neg_risk": false,
+                          "neg_risk_market_id": null,
+                          "neg_risk_request_id": null,
+                          "icon": "https://example.com/icon.png",
+                          "image": "https://example.com/image.png",
+                          "rewards": {
+                            "rates": null,
+                            "min_size": 10,
+                            "max_spread": 3
+                          },
+                          "is_50_50_outcome": true,
+                          "tokens": [
+                            {
+                              "token_id": "t1",
+                              "outcome": "Yes",
+                              "price": 0.42,
+                              "winner": false
+                            }
+                          ],
+                          "tags": [
+                            "weather"
+                          ],
+                          "custom_field": "kept"
+                        }
+                      ]
+                    }
+                    """),
+                _ => throw new InvalidOperationException($"Unexpected path {request.RequestUri!.AbsolutePath}."),
+            };
+        }));
+
+        await using ClobClient client = new("https://clob.polymarket.com", Chain.Polygon, httpClient);
+
+        PaginationPayload<Market> markets = await client.GetMarketsAsync();
+
+        Market market = Assert.Single(markets.Data);
+        Assert.Equal("c1", market.ConditionId);
+        Assert.Equal("Will it rain?", market.Question);
+        Assert.Single(market.Tokens);
+        Assert.Equal("t1", market.Tokens[0].TokenId);
+        Assert.True(market.IsFiftyFiftyOutcome);
+        Assert.Equal("kept", market.ExtensionData["custom_field"].GetString());
+    }
+
+    [Fact]
+    public async Task GetSimplifiedMarketsAsync_ReturnsStronglyTypedMarkets()
+    {
+        using HttpClient httpClient = new(new StubHttpMessageHandler(request =>
+        {
+            return request.RequestUri!.AbsolutePath switch
+            {
+                "/simplified-markets" => CreateJsonResponse(
+                    """
+                    {
+                      "limit": 1,
+                      "count": 1,
+                      "next_cursor": "LTE=",
+                      "data": [
+                        {
+                          "condition_id": "c1",
+                          "rewards": {
+                            "rates": null,
+                            "min_size": 1,
+                            "max_spread": 2
+                          },
+                          "tokens": [
+                            {
+                              "token_id": "t1",
+                              "outcome": "Yes",
+                              "price": 0.51,
+                              "winner": false
+                            }
+                          ],
+                          "active": true,
+                          "closed": false,
+                          "archived": false,
+                          "accepting_orders": true,
+                          "category": "weather"
+                        }
+                      ]
+                    }
+                    """),
+                _ => throw new InvalidOperationException($"Unexpected path {request.RequestUri!.AbsolutePath}."),
+            };
+        }));
+
+        await using ClobClient client = new("https://clob.polymarket.com", Chain.Polygon, httpClient);
+
+        PaginationPayload<SimplifiedMarket> markets = await client.GetSimplifiedMarketsAsync();
+
+        SimplifiedMarket market = Assert.Single(markets.Data);
+        Assert.Equal("c1", market.ConditionId);
+        Assert.True(market.AcceptingOrders);
+        Assert.Equal(1, market.Rewards!.MinSize);
+        Assert.Equal("weather", market.ExtensionData["category"].GetString());
+    }
+
+    [Fact]
+    public async Task GetMarketAsync_AndGetMarketByTokenAsync_ReturnStronglyTypedResponses()
+    {
+        using HttpClient httpClient = new(new StubHttpMessageHandler(request =>
+        {
+            return request.RequestUri!.AbsolutePath switch
+            {
+                "/markets/c1" => CreateJsonResponse(
+                    """
+                    {
+                      "enable_order_book": true,
+                      "active": true,
+                      "closed": false,
+                      "archived": false,
+                      "accepting_orders": true,
+                      "accepting_order_timestamp": "2025-01-01T00:00:00Z",
+                      "minimum_order_size": 5,
+                      "minimum_tick_size": 0.01,
+                      "condition_id": "c1",
+                      "question_id": "q1",
+                      "question": "Will it rain?",
+                      "description": "Rain market",
+                      "market_slug": "will-it-rain",
+                      "end_date_iso": "2025-01-02T00:00:00Z",
+                      "game_start_time": null,
+                      "seconds_delay": 0,
+                      "fpmm": "0xabc",
+                      "maker_base_fee": 0,
+                      "taker_base_fee": 0,
+                      "notifications_enabled": true,
+                      "neg_risk": false,
+                      "neg_risk_market_id": null,
+                      "neg_risk_request_id": null,
+                      "icon": null,
+                      "image": null,
+                      "rewards": {
+                        "rates": null,
+                        "min_size": 10,
+                        "max_spread": 3
+                      },
+                      "is_50_50_outcome": true,
+                      "tokens": [
+                        {
+                          "token_id": "t1",
+                          "outcome": "Yes",
+                          "price": 0.42,
+                          "winner": false
+                        }
+                      ],
+                      "tags": [
+                        "weather"
+                      ]
+                    }
+                    """),
+                "/markets-by-token/t1" => CreateJsonResponse("""{"condition_id":"c1","primary_token_id":"t1","secondary_token_id":"t2"}"""),
+                _ => throw new InvalidOperationException($"Unexpected path {request.RequestUri!.AbsolutePath}."),
+            };
+        }));
+
+        await using ClobClient client = new("https://clob.polymarket.com", Chain.Polygon, httpClient);
+
+        Market market = await client.GetMarketAsync("c1");
+        MarketByTokenResponse marketByToken = await client.GetMarketByTokenAsync("t1");
+
+        Assert.Equal("c1", market.ConditionId);
+        Assert.Equal("t1", market.Tokens[0].TokenId);
+        Assert.Equal("c1", marketByToken.ConditionId);
+        Assert.Equal("t1", marketByToken.PrimaryTokenId);
+        Assert.Equal("t2", marketByToken.SecondaryTokenId);
+    }
+
+    [Fact]
     public void ContractConfig_ReturnsPolygonAddresses()
     {
         using HttpClient httpClient = new(new StubHttpMessageHandler(_ => CreateJsonResponse("""{"version":2}""")));

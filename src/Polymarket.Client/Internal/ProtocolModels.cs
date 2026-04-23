@@ -56,12 +56,6 @@ internal sealed record BuilderFeeRateResponse
     public int BuilderTakerFeeRateBps { get; init; }
 }
 
-internal sealed record MarketByTokenResponse
-{
-    [JsonPropertyName("condition_id")]
-    public string ConditionId { get; init; } = string.Empty;
-}
-
 internal sealed record ClobErrorResponseBody
 {
     [JsonPropertyName("error")]

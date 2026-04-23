@@ -124,28 +124,28 @@ public sealed class ClobClient : IDisposable, IAsyncDisposable
         throw new InvalidOperationException("The server time payload could not be parsed.");
     }
 
-    public Task<PaginationPayload<DynamicPayload>> GetSamplingSimplifiedMarketsAsync(string nextCursor = PolymarketConstants.InitialCursor, CancellationToken cancellationToken = default) =>
-        SendAsync<PaginationPayload<DynamicPayload>>(HttpMethod.Get, ClobEndpoints.GetSamplingSimplifiedMarkets, query: new Dictionary<string, string?> { ["next_cursor"] = nextCursor }, cancellationToken: cancellationToken);
+    public Task<PaginationPayload<SimplifiedMarket>> GetSamplingSimplifiedMarketsAsync(string nextCursor = PolymarketConstants.InitialCursor, CancellationToken cancellationToken = default) =>
+        SendAsync<PaginationPayload<SimplifiedMarket>>(HttpMethod.Get, ClobEndpoints.GetSamplingSimplifiedMarkets, query: new Dictionary<string, string?> { ["next_cursor"] = nextCursor }, cancellationToken: cancellationToken);
 
-    public Task<PaginationPayload<DynamicPayload>> GetSamplingMarketsAsync(string nextCursor = PolymarketConstants.InitialCursor, CancellationToken cancellationToken = default) =>
-        SendAsync<PaginationPayload<DynamicPayload>>(HttpMethod.Get, ClobEndpoints.GetSamplingMarkets, query: new Dictionary<string, string?> { ["next_cursor"] = nextCursor }, cancellationToken: cancellationToken);
+    public Task<PaginationPayload<Market>> GetSamplingMarketsAsync(string nextCursor = PolymarketConstants.InitialCursor, CancellationToken cancellationToken = default) =>
+        SendAsync<PaginationPayload<Market>>(HttpMethod.Get, ClobEndpoints.GetSamplingMarkets, query: new Dictionary<string, string?> { ["next_cursor"] = nextCursor }, cancellationToken: cancellationToken);
 
-    public Task<PaginationPayload<DynamicPayload>> GetSimplifiedMarketsAsync(string nextCursor = PolymarketConstants.InitialCursor, CancellationToken cancellationToken = default) =>
-        SendAsync<PaginationPayload<DynamicPayload>>(HttpMethod.Get, ClobEndpoints.GetSimplifiedMarkets, query: new Dictionary<string, string?> { ["next_cursor"] = nextCursor }, cancellationToken: cancellationToken);
+    public Task<PaginationPayload<SimplifiedMarket>> GetSimplifiedMarketsAsync(string nextCursor = PolymarketConstants.InitialCursor, CancellationToken cancellationToken = default) =>
+        SendAsync<PaginationPayload<SimplifiedMarket>>(HttpMethod.Get, ClobEndpoints.GetSimplifiedMarkets, query: new Dictionary<string, string?> { ["next_cursor"] = nextCursor }, cancellationToken: cancellationToken);
 
-    public Task<PaginationPayload<DynamicPayload>> GetMarketsAsync(string nextCursor = PolymarketConstants.InitialCursor, CancellationToken cancellationToken = default) =>
-        SendAsync<PaginationPayload<DynamicPayload>>(HttpMethod.Get, ClobEndpoints.GetMarkets, query: new Dictionary<string, string?> { ["next_cursor"] = nextCursor }, cancellationToken: cancellationToken);
+    public Task<PaginationPayload<Market>> GetMarketsAsync(string nextCursor = PolymarketConstants.InitialCursor, CancellationToken cancellationToken = default) =>
+        SendAsync<PaginationPayload<Market>>(HttpMethod.Get, ClobEndpoints.GetMarkets, query: new Dictionary<string, string?> { ["next_cursor"] = nextCursor }, cancellationToken: cancellationToken);
 
-    public Task<DynamicPayload> GetMarketAsync(string conditionId, CancellationToken cancellationToken = default)
+    public Task<Market> GetMarketAsync(string conditionId, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(conditionId);
-        return SendAsync<DynamicPayload>(HttpMethod.Get, $"{ClobEndpoints.GetMarket}{conditionId}", cancellationToken: cancellationToken);
+        return SendAsync<Market>(HttpMethod.Get, $"{ClobEndpoints.GetMarket}{conditionId}", cancellationToken: cancellationToken);
     }
 
-    public Task<DynamicPayload> GetMarketByTokenAsync(string tokenId, CancellationToken cancellationToken = default)
+    public Task<MarketByTokenResponse> GetMarketByTokenAsync(string tokenId, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(tokenId);
-        return SendAsync<DynamicPayload>(HttpMethod.Get, $"{ClobEndpoints.GetMarketByToken}{tokenId}", cancellationToken: cancellationToken);
+        return SendAsync<MarketByTokenResponse>(HttpMethod.Get, $"{ClobEndpoints.GetMarketByToken}{tokenId}", cancellationToken: cancellationToken);
     }
 
     public async Task<MarketDetails> GetClobMarketInfoAsync(string conditionId, CancellationToken cancellationToken = default)

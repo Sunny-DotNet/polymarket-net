@@ -43,7 +43,7 @@ await using ClobClient client = new("https://clob.polymarket.com", Chain.Polygon
 
 int version = await client.GetVersionAsync();
 long serverTime = await client.GetServerTimeAsync();
-PaginationPayload<DynamicPayload> markets = await client.GetMarketsAsync();
+PaginationPayload<Market> markets = await client.GetMarketsAsync();
 OrderBookSummary book = await client.GetOrderBookAsync("TOKEN_ID");
 ```
 

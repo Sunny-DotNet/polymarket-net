@@ -9,7 +9,7 @@ Console.WriteLine($"Using host: {client.Host}");
 Console.WriteLine($"Version: {await client.GetVersionAsync()}");
 Console.WriteLine($"Server time: {await client.GetServerTimeAsync()}");
 
-PaginationPayload<DynamicPayload> markets = await client.GetMarketsAsync();
+PaginationPayload<Market> markets = await client.GetMarketsAsync();
 Console.WriteLine($"Fetched page with {markets.Data.Count} markets.");
 
 if (!string.IsNullOrWhiteSpace(privateKey))

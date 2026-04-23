@@ -53,6 +53,174 @@ public sealed record DynamicPayload
     public Dictionary<string, JsonElement> Data { get; init; } = [];
 }
 
+public sealed record MarketRewards
+{
+    [JsonPropertyName("rates")]
+    public JsonElement? Rates { get; init; }
+
+    [JsonPropertyName("min_size")]
+    public decimal MinSize { get; init; }
+
+    [JsonPropertyName("max_spread")]
+    public decimal MaxSpread { get; init; }
+
+    [JsonExtensionData]
+    public Dictionary<string, JsonElement> ExtensionData { get; init; } = [];
+}
+
+public sealed record MarketToken
+{
+    [JsonPropertyName("token_id")]
+    public string TokenId { get; init; } = string.Empty;
+
+    [JsonPropertyName("outcome")]
+    public string Outcome { get; init; } = string.Empty;
+
+    [JsonPropertyName("price")]
+    public decimal Price { get; init; }
+
+    [JsonPropertyName("winner")]
+    public bool Winner { get; init; }
+
+    [JsonExtensionData]
+    public Dictionary<string, JsonElement> ExtensionData { get; init; } = [];
+}
+
+public sealed record SimplifiedMarket
+{
+    [JsonPropertyName("condition_id")]
+    public string ConditionId { get; init; } = string.Empty;
+
+    [JsonPropertyName("rewards")]
+    public MarketRewards? Rewards { get; init; }
+
+    [JsonPropertyName("tokens")]
+    public IReadOnlyList<MarketToken> Tokens { get; init; } = [];
+
+    [JsonPropertyName("active")]
+    public bool Active { get; init; }
+
+    [JsonPropertyName("closed")]
+    public bool Closed { get; init; }
+
+    [JsonPropertyName("archived")]
+    public bool Archived { get; init; }
+
+    [JsonPropertyName("accepting_orders")]
+    public bool AcceptingOrders { get; init; }
+
+    [JsonExtensionData]
+    public Dictionary<string, JsonElement> ExtensionData { get; init; } = [];
+}
+
+public sealed record Market
+{
+    [JsonPropertyName("enable_order_book")]
+    public bool EnableOrderBook { get; init; }
+
+    [JsonPropertyName("active")]
+    public bool Active { get; init; }
+
+    [JsonPropertyName("closed")]
+    public bool Closed { get; init; }
+
+    [JsonPropertyName("archived")]
+    public bool Archived { get; init; }
+
+    [JsonPropertyName("accepting_orders")]
+    public bool AcceptingOrders { get; init; }
+
+    [JsonPropertyName("accepting_order_timestamp")]
+    public string? AcceptingOrderTimestamp { get; init; }
+
+    [JsonPropertyName("minimum_order_size")]
+    public decimal MinimumOrderSize { get; init; }
+
+    [JsonPropertyName("minimum_tick_size")]
+    public decimal MinimumTickSize { get; init; }
+
+    [JsonPropertyName("condition_id")]
+    public string ConditionId { get; init; } = string.Empty;
+
+    [JsonPropertyName("question_id")]
+    public string? QuestionId { get; init; }
+
+    [JsonPropertyName("question")]
+    public string Question { get; init; } = string.Empty;
+
+    [JsonPropertyName("description")]
+    public string Description { get; init; } = string.Empty;
+
+    [JsonPropertyName("market_slug")]
+    public string MarketSlug { get; init; } = string.Empty;
+
+    [JsonPropertyName("end_date_iso")]
+    public string? EndDateIso { get; init; }
+
+    [JsonPropertyName("game_start_time")]
+    public string? GameStartTime { get; init; }
+
+    [JsonPropertyName("seconds_delay")]
+    public int SecondsDelay { get; init; }
+
+    [JsonPropertyName("fpmm")]
+    public string? Fpmm { get; init; }
+
+    [JsonPropertyName("maker_base_fee")]
+    public decimal? MakerBaseFee { get; init; }
+
+    [JsonPropertyName("taker_base_fee")]
+    public decimal? TakerBaseFee { get; init; }
+
+    [JsonPropertyName("notifications_enabled")]
+    public bool NotificationsEnabled { get; init; }
+
+    [JsonPropertyName("neg_risk")]
+    public bool NegRisk { get; init; }
+
+    [JsonPropertyName("neg_risk_market_id")]
+    public string? NegRiskMarketId { get; init; }
+
+    [JsonPropertyName("neg_risk_request_id")]
+    public string? NegRiskRequestId { get; init; }
+
+    [JsonPropertyName("icon")]
+    public string? Icon { get; init; }
+
+    [JsonPropertyName("image")]
+    public string? Image { get; init; }
+
+    [JsonPropertyName("rewards")]
+    public MarketRewards? Rewards { get; init; }
+
+    [JsonPropertyName("is_50_50_outcome")]
+    public bool IsFiftyFiftyOutcome { get; init; }
+
+    [JsonPropertyName("tokens")]
+    public IReadOnlyList<MarketToken> Tokens { get; init; } = [];
+
+    [JsonPropertyName("tags")]
+    public IReadOnlyList<string> Tags { get; init; } = [];
+
+    [JsonExtensionData]
+    public Dictionary<string, JsonElement> ExtensionData { get; init; } = [];
+}
+
+public sealed record MarketByTokenResponse
+{
+    [JsonPropertyName("condition_id")]
+    public string ConditionId { get; init; } = string.Empty;
+
+    [JsonPropertyName("primary_token_id")]
+    public string? PrimaryTokenId { get; init; }
+
+    [JsonPropertyName("secondary_token_id")]
+    public string? SecondaryTokenId { get; init; }
+
+    [JsonExtensionData]
+    public Dictionary<string, JsonElement> ExtensionData { get; init; } = [];
+}
+
 public sealed record PaginationPayload<T>(
     [property: JsonPropertyName("limit")] int Limit,
     [property: JsonPropertyName("count")] int Count,
