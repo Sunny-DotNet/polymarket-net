@@ -11,7 +11,7 @@ public sealed class GammaClientTests
     {
         await using GammaClient client = new();
 
-        Assert.Equal(PolymarketHosts.Gamma, client.Host.AbsoluteUri);
+        Assert.Equal(PolymarketHosts.Gamma, client.Host);
     }
 
     [Fact]

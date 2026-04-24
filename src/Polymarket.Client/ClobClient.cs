@@ -24,22 +24,13 @@ public sealed class ClobClient : IDisposable, IAsyncDisposable
     public ClobClient(Chain chain = Chain.Polygon, HttpClient? httpClient = null)
         : this(new ClobClientOptions
         {
-            Host = new Uri(PolymarketHosts.Clob, UriKind.Absolute),
+            Host = PolymarketHosts.Clob,
             Chain = chain,
         }, httpClient)
     {
     }
 
     public ClobClient(string host, Chain chain, HttpClient? httpClient = null)
-        : this(new ClobClientOptions
-        {
-            Host = new Uri(host, UriKind.Absolute),
-            Chain = chain,
-        }, httpClient)
-    {
-    }
-
-    public ClobClient(Uri host, Chain chain, HttpClient? httpClient = null)
         : this(new ClobClientOptions
         {
             Host = host,
@@ -52,7 +43,7 @@ public sealed class ClobClient : IDisposable, IAsyncDisposable
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        Uri normalizedHost = NormalizeHost(options.Host);
+        var normalizedHost = NormalizeHost(options.Host);
 
         Options = options with
         {
@@ -63,14 +54,14 @@ public sealed class ClobClient : IDisposable, IAsyncDisposable
         _signer = string.IsNullOrWhiteSpace(options.PrivateKey) ? null : new PolymarketSigner(options.PrivateKey);
         _httpClient = httpClient ?? new HttpClient();
         _disposeHttpClient = httpClient is null;
-        _httpClient.BaseAddress = normalizedHost;
+        _httpClient.BaseAddress = new Uri(normalizedHost, UriKind.Absolute);
         _httpClient.DefaultRequestHeaders.Accept.Clear();
         _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     }
 
     public ClobClientOptions Options { get; private set; }
 
-    public Uri Host => Options.Host;
+    public Uri Host => _httpClient.BaseAddress!;
 
     public Chain Chain => Options.Chain;
 
@@ -1218,10 +1209,10 @@ public sealed class ClobClient : IDisposable, IAsyncDisposable
         _ => throw new InvalidOperationException($"Unsupported order version {version}."),
     };
 
-    private static Uri NormalizeHost(Uri host)
+    private static string NormalizeHost(string host)
     {
         ArgumentNullException.ThrowIfNull(host);
-        string normalized = host.AbsoluteUri.TrimEnd('/') + "/";
-        return new Uri(normalized, UriKind.Absolute);
+        string normalized = host.TrimEnd('/') + "/";
+        return normalized;
     }
 }

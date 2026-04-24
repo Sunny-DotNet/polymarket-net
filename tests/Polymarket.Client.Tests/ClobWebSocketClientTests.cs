@@ -12,8 +12,8 @@ public sealed class ClobWebSocketClientTests
     {
         ClobWebSocketClient client = new();
 
-        Assert.Equal(PolymarketHosts.ClobWebSocket, client.Host.AbsoluteUri);
-        Assert.Equal(PolymarketHosts.SportsWebSocket, client.SportsHost.AbsoluteUri);
+        Assert.Equal(PolymarketHosts.ClobWebSocket, client.Host);
+        Assert.Equal(PolymarketHosts.SportsWebSocket, client.SportsHost);
     }
 
     [Fact]

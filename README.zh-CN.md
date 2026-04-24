@@ -41,7 +41,7 @@ dotnet test tests\Polymarket.Client.Tests\Polymarket.Client.Tests.csproj --filte
 ```csharp
 using Polymarket.Client;
 
-await using ClobClient client = new("https://clob.polymarket.com", Chain.Polygon);
+await using ClobClient client = new(Chain.Polygon);
 
 int version = await client.GetVersionAsync();
 long serverTime = await client.GetServerTimeAsync();
@@ -58,7 +58,7 @@ Gamma 调用：
 ```csharp
 using Polymarket.Client;
 
-await using GammaClient gammaClient = new("https://gamma-api.polymarket.com");
+await using GammaClient gammaClient = new();
 
 string status = await gammaClient.GetStatusAsync();
 IReadOnlyList<GammaMarket> gammaMarkets = await gammaClient.GetMarketsAsync(new GammaMarketQueryParameters
@@ -105,7 +105,6 @@ using Polymarket.Client;
 
 ClobClientOptions options = new()
 {
-    Host = new Uri("https://clob.polymarket.com"),
     Chain = Chain.Polygon,
     PrivateKey = Environment.GetEnvironmentVariable("POLYMARKET_PRIVATE_KEY"),
     Credentials = new ApiCredentials(
@@ -141,8 +140,3 @@ JsonElement postResult = await authedClient.PostOrderAsync(order);
 dotnet run --project examples\Polymarket.Client.ConsoleApp\Polymarket.Client.ConsoleApp.csproj
 ```
 
-## 发布
-
-- CI 运行在 GitHub Actions `windows-latest`
-- NuGet 发布由 tag 触发，并从 tag 推导版本号
-- 发布流程参考 `Sunny-DotNet/open-hub-agent` 的 Trusted Publishing 方式

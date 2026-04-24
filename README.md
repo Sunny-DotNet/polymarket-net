@@ -41,7 +41,7 @@ dotnet test tests\Polymarket.Client.Tests\Polymarket.Client.Tests.csproj --filte
 ```csharp
 using Polymarket.Client;
 
-await using ClobClient client = new("https://clob.polymarket.com", Chain.Polygon);
+await using ClobClient client = new(Chain.Polygon);
 
 int version = await client.GetVersionAsync();
 long serverTime = await client.GetServerTimeAsync();
@@ -58,7 +58,7 @@ Gamma usage:
 ```csharp
 using Polymarket.Client;
 
-await using GammaClient gammaClient = new("https://gamma-api.polymarket.com");
+await using GammaClient gammaClient = new();
 
 string status = await gammaClient.GetStatusAsync();
 IReadOnlyList<GammaMarket> gammaMarkets = await gammaClient.GetMarketsAsync(new GammaMarketQueryParameters
@@ -105,7 +105,6 @@ using Polymarket.Client;
 
 ClobClientOptions options = new()
 {
-    Host = new Uri("https://clob.polymarket.com"),
     Chain = Chain.Polygon,
     PrivateKey = Environment.GetEnvironmentVariable("POLYMARKET_PRIVATE_KEY"),
     Credentials = new ApiCredentials(
@@ -141,8 +140,3 @@ The console sample now demonstrates **Gamma discovery + CLOB websocket streaming
 dotnet run --project examples\Polymarket.Client.ConsoleApp\Polymarket.Client.ConsoleApp.csproj
 ```
 
-## Release automation
-
-- CI runs on GitHub Actions with `windows-latest`
-- NuGet publishing is tag-driven and derives the package version from the git tag
-- Publishing follows the same Trusted Publishing pattern used in `Sunny-DotNet/open-hub-agent`

@@ -19,7 +19,7 @@ if (!string.IsNullOrWhiteSpace(privateKey))
 {
     ClobClientOptions options = new()
     {
-        Host = new Uri(host),
+        Host = host,
         Chain = Chain.Polygon,
         PrivateKey = privateKey,
     };

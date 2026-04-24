@@ -90,7 +90,7 @@ public sealed class ClobMarketWebSocketSession : ClobWebSocketSession<ClobMarket
             AssetIds = [.. request.AssetIds],
         };
 
-        protected override Uri Endpoint => new(Options.Host, "market");
+        protected override Uri Endpoint => new(new Uri(Options.Host, UriKind.Absolute), "market");
 
         protected override bool HasReconnectableState
         {
@@ -259,7 +259,7 @@ public sealed class ClobUserWebSocketSession : ClobWebSocketSession<ClobUserChan
             Markets = request.Markets is null ? null : [.. request.Markets],
         };
 
-        protected override Uri Endpoint => new(Options.Host, "user");
+        protected override Uri Endpoint => new(new Uri(Options.Host, UriKind.Absolute), "user");
 
         protected override bool HasReconnectableState => true;
 
@@ -372,7 +372,7 @@ public sealed class SportsWebSocketSession : ClobWebSocketSession<SportsResultUp
         IClobWebSocketConnectionFactory connectionFactory)
         : ClobWebSocketSessionController<SportsResultUpdateMessage>(options, connectionFactory)
     {
-        protected override Uri Endpoint => new(Options.SportsHost, "ws");
+        protected override Uri Endpoint => new(new Uri(Options.SportsHost, UriKind.Absolute), "ws");
 
         protected override bool HasReconnectableState => true;
 

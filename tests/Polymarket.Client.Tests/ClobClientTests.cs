@@ -46,7 +46,7 @@ public sealed class ClobClientTests
 
         ClobClientOptions options = new()
         {
-            Host = new Uri("https://clob.polymarket.com"),
+            Host = PolymarketHosts.Clob,
             Chain = Chain.Amoy,
             PrivateKey = KnownPrivateKey,
             UseServerTime = true,
@@ -84,7 +84,7 @@ public sealed class ClobClientTests
 
         ClobClientOptions options = new()
         {
-            Host = new Uri("https://clob.polymarket.com"),
+            Host = PolymarketHosts.Clob,
             Chain = Chain.Polygon,
             PrivateKey = KnownPrivateKey,
             Credentials = new ApiCredentials("key-1", apiSecret, "pass-1"),
@@ -124,7 +124,7 @@ public sealed class ClobClientTests
 
         ClobClientOptions options = new()
         {
-            Host = new Uri("https://clob.polymarket.com"),
+            Host = PolymarketHosts.Clob,
             Chain = Chain.Polygon,
             PrivateKey = KnownPrivateKey,
             Credentials = new ApiCredentials("key-1", apiSecret, "pass-1"),
@@ -168,7 +168,7 @@ public sealed class ClobClientTests
 
         ClobClientOptions options = new()
         {
-            Host = new Uri("https://clob.polymarket.com"),
+            Host = PolymarketHosts.Clob,
             Chain = Chain.Polygon,
             PrivateKey = KnownPrivateKey,
             Credentials = new ApiCredentials("key-1", apiSecret, "pass-1"),
@@ -200,7 +200,7 @@ public sealed class ClobClientTests
 
         ClobClientOptions options = new()
         {
-            Host = new Uri("https://clob.polymarket.com"),
+            Host = PolymarketHosts.Clob,
             Chain = Chain.Polygon,
             PrivateKey = KnownPrivateKey,
         };
@@ -267,7 +267,7 @@ public sealed class ClobClientTests
 
         ClobClientOptions options = new()
         {
-            Host = new Uri("https://clob.polymarket.com"),
+            Host = PolymarketHosts.Clob,
             Chain = Chain.Polygon,
             PrivateKey = KnownPrivateKey,
             Credentials = new ApiCredentials("key-1", apiSecret, "pass-1"),

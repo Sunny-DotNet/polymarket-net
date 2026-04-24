@@ -10,18 +10,18 @@
   - `dotnet test tests\Polymarket.Client.Tests\Polymarket.Client.Tests.csproj --configuration Release`
 - Run a single test:
   - `dotnet test tests\Polymarket.Client.Tests\Polymarket.Client.Tests.csproj --filter "FullyQualifiedName~Polymarket.Client.Tests.ClobClientTests.GetVersionAsync_ReturnsVersionFromPayload"`
-- CI and publishing are intentionally modeled after `Sunny-DotNet/open-hub-agent`:
+- CI and publishing conventions:
   - CI runs restore/build/test on `windows-latest`
   - NuGet publishing uses tag-triggered `publish-nuget.yml`
   - package version is derived from the git tag inside the workflow
   - pack runs with `ContinuousIntegrationBuild=true`
-  - release publishes `.nupkg` artifacts through `NuGet/login@v1` Trusted Publishing and also pushes them to GitHub Packages
+  - release publishes `.nupkg` artifacts through `NuGet/login@v1` and also pushes them to GitHub Packages
 
 ## High-level architecture
 
 - This repository is intended to become a .NET SDK for **Polymarket CLOB v2**.
 - The package and root namespace should be **`Polymarket.Client`**.
-- Repository layout should follow the same high-level shape as `Sunny-DotNet/CommonCrawl.Net`:
+- Repository layout should follow this high-level shape:
   - root solution file plus shared `Directory.Build.props` / `Directory.Packages.props`
   - `src/Polymarket.Client` for the SDK
   - `tests/Polymarket.Client.Tests` for tests
@@ -62,7 +62,7 @@
 - Avoid silent fallbacks in the .NET implementation; surface explicit exceptions or typed error results consistent with the eventual SDK design.
 - Cache market metadata that the reference SDKs cache as part of the client flow, especially tick size, neg-risk flags, and fee-related metadata.
 - Treat `Polymarket.Client` as the package identity unless the repository later adds an explicit replacement.
-- Follow the `open-hub-agent` packaging style when the .NET projects are created:
+- Follow these packaging conventions when the .NET projects are created:
   - put repository-wide package metadata in `Directory.Build.props`
   - keep shared package versions in `Directory.Packages.props` instead of repeating versions in each `.csproj`
   - include `RepositoryUrl`, `RepositoryType`, `PublishRepositoryUrl`, `EmbedUntrackedSources`, and `DebugType=embedded`

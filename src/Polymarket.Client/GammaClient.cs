@@ -18,7 +18,7 @@ public sealed class GammaClient : IDisposable, IAsyncDisposable
     public GammaClient(string host, HttpClient? httpClient = null)
         : this(new GammaClientOptions
         {
-            Host = new Uri(host, UriKind.Absolute),
+            Host = host,
         }, httpClient)
     {
     }
@@ -26,7 +26,7 @@ public sealed class GammaClient : IDisposable, IAsyncDisposable
     public GammaClient(Uri host, HttpClient? httpClient = null)
         : this(new GammaClientOptions
         {
-            Host = host,
+            Host = host.AbsoluteUri,
         }, httpClient)
     {
     }
@@ -35,12 +35,12 @@ public sealed class GammaClient : IDisposable, IAsyncDisposable
     {
         ArgumentNullException.ThrowIfNull(options);
 
-        Uri normalizedHost = NormalizeHost(options.Host);
+        string normalizedHost = NormalizeHost(options.Host);
         Options = options with { Host = normalizedHost };
 
         _httpClient = httpClient ?? new HttpClient();
         _disposeHttpClient = httpClient is null;
-        _httpClient.BaseAddress = normalizedHost;
+        _httpClient.BaseAddress = new Uri(normalizedHost, UriKind.Absolute);
         _httpClient.DefaultRequestHeaders.Accept.Clear();
         _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
@@ -48,7 +48,7 @@ public sealed class GammaClient : IDisposable, IAsyncDisposable
 
     public GammaClientOptions Options { get; private set; }
 
-    public Uri Host => Options.Host;
+    public string Host => Options.Host;
 
     public Task<string> GetStatusAsync(CancellationToken cancellationToken = default) =>
         SendAsync<string>(HttpMethod.Get, GammaEndpoints.Status, cancellationToken: cancellationToken);
@@ -295,11 +295,10 @@ public sealed class GammaClient : IDisposable, IAsyncDisposable
         return PolymarketJson.Deserialize<T>(payload);
     }
 
-    private static Uri NormalizeHost(Uri host)
+    private static string NormalizeHost(string host)
     {
-        ArgumentNullException.ThrowIfNull(host);
-        string normalized = host.AbsoluteUri.TrimEnd('/') + "/";
-        return new Uri(normalized, UriKind.Absolute);
+        ArgumentException.ThrowIfNullOrWhiteSpace(host);
+        return host.TrimEnd('/') + "/";
     }
 
     private static void ThrowHttpError(HttpStatusCode statusCode, string responseBody)

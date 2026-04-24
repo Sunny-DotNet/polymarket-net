@@ -15,7 +15,7 @@ public sealed class ClobWebSocketClient
     public ClobWebSocketClient(string host)
         : this(new ClobWebSocketClientOptions
         {
-            Host = new Uri(host, UriKind.Absolute),
+            Host = host,
         })
     {
     }
@@ -23,7 +23,7 @@ public sealed class ClobWebSocketClient
     public ClobWebSocketClient(Uri host)
         : this(new ClobWebSocketClientOptions
         {
-            Host = host,
+            Host = host.AbsoluteUri,
         })
     {
     }
@@ -48,9 +48,9 @@ public sealed class ClobWebSocketClient
 
     public ClobWebSocketClientOptions Options { get; }
 
-    public Uri Host => Options.Host;
+    public string Host => Options.Host;
 
-    public Uri SportsHost => Options.SportsHost;
+    public string SportsHost => Options.SportsHost;
 
     public async Task<ClobMarketWebSocketSession> ConnectMarketAsync(
         ClobMarketSubscriptionRequest request,
@@ -162,10 +162,9 @@ public sealed class ClobWebSocketClient
         }
     }
 
-    private static Uri NormalizeHost(Uri host)
+    private static string NormalizeHost(string host)
     {
-        ArgumentNullException.ThrowIfNull(host);
-        string normalized = host.AbsoluteUri.TrimEnd('/') + "/";
-        return new Uri(normalized, UriKind.Absolute);
+        ArgumentException.ThrowIfNullOrWhiteSpace(host);
+        return host.TrimEnd('/') + "/";
     }
 }
