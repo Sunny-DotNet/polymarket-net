@@ -7,6 +7,14 @@ namespace Polymarket.Client.Tests;
 public sealed class GammaClientTests
 {
     [Fact]
+    public async Task Constructor_UsesDefaultGammaHostConstant()
+    {
+        await using GammaClient client = new();
+
+        Assert.Equal(PolymarketHosts.Gamma, client.Host.AbsoluteUri);
+    }
+
+    [Fact]
     public async Task GetStatusAsync_ReturnsPlainTextPayload()
     {
         using HttpClient httpClient = new(new StubHttpMessageHandler(_ => CreateTextResponse("OK")));

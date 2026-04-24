@@ -8,6 +8,15 @@ namespace Polymarket.Client.Tests;
 public sealed class ClobWebSocketClientTests
 {
     [Fact]
+    public void Constructor_UsesDefaultWebSocketHostConstants()
+    {
+        ClobWebSocketClient client = new();
+
+        Assert.Equal(PolymarketHosts.ClobWebSocket, client.Host.AbsoluteUri);
+        Assert.Equal(PolymarketHosts.SportsWebSocket, client.SportsHost.AbsoluteUri);
+    }
+
+    [Fact]
     public async Task ConnectMarketAsync_SendsDocumentedInitialRequestAndSubscriptionUpdates()
     {
         FakeWebSocketConnection connection = new();

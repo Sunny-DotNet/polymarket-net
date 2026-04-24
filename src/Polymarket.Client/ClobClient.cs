@@ -21,6 +21,15 @@ public sealed class ClobClient : IDisposable, IAsyncDisposable
     private ApiCredentials? _credentials;
     private int? _cachedVersion;
 
+    public ClobClient(Chain chain = Chain.Polygon, HttpClient? httpClient = null)
+        : this(new ClobClientOptions
+        {
+            Host = new Uri(PolymarketHosts.Clob, UriKind.Absolute),
+            Chain = chain,
+        }, httpClient)
+    {
+    }
+
     public ClobClient(string host, Chain chain, HttpClient? httpClient = null)
         : this(new ClobClientOptions
         {

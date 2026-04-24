@@ -1,7 +1,7 @@
 using Polymarket.Client;
 
-var host = Environment.GetEnvironmentVariable("POLYMARKET_CLOB_HOST") ?? "https://clob.polymarket.com";
-var gammaHost = Environment.GetEnvironmentVariable("POLYMARKET_GAMMA_HOST") ?? "https://gamma-api.polymarket.com";
+var host = Environment.GetEnvironmentVariable("POLYMARKET_CLOB_HOST") ?? PolymarketHosts.Clob;
+var gammaHost = Environment.GetEnvironmentVariable("POLYMARKET_GAMMA_HOST") ?? PolymarketHosts.Gamma;
 var privateKey = Environment.GetEnvironmentVariable("POLYMARKET_PRIVATE_KEY");
 
 await using ClobClient clobClient = new(host, Chain.Polygon);

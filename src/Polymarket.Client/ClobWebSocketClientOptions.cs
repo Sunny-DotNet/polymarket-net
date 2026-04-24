@@ -2,9 +2,9 @@ namespace Polymarket.Client;
 
 public sealed record ClobWebSocketClientOptions
 {
-    public Uri Host { get; init; } = new("wss://ws-subscriptions-clob.polymarket.com/ws/", UriKind.Absolute);
+    public Uri Host { get; init; } = new(PolymarketHosts.ClobWebSocket, UriKind.Absolute);
 
-    public Uri SportsHost { get; init; } = new("wss://sports-api.polymarket.com/", UriKind.Absolute);
+    public Uri SportsHost { get; init; } = new(PolymarketHosts.SportsWebSocket, UriKind.Absolute);
 
     public TimeSpan PingInterval { get; init; } = TimeSpan.FromSeconds(10);
 

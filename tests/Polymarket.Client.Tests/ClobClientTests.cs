@@ -12,6 +12,14 @@ public sealed class ClobClientTests
     private const string KnownAddress = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
 
     [Fact]
+    public async Task Constructor_UsesDefaultClobHostConstant()
+    {
+        await using ClobClient client = new();
+
+        Assert.Equal(PolymarketHosts.Clob, client.Host.AbsoluteUri);
+    }
+
+    [Fact]
     public async Task GetVersionAsync_ReturnsVersionFromPayload()
     {
         using HttpClient httpClient = new(new StubHttpMessageHandler(_ => CreateJsonResponse("""{"version":3}""")));

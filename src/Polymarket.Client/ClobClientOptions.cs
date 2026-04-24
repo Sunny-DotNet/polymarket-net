@@ -2,7 +2,7 @@ namespace Polymarket.Client;
 
 public sealed record ClobClientOptions
 {
-    public required Uri Host { get; init; }
+    public Uri Host { get; init; } = new(PolymarketHosts.Clob, UriKind.Absolute);
 
     public Chain Chain { get; init; } = Chain.Polygon;
 
