@@ -125,16 +125,40 @@ public sealed class ClobClient : IDisposable, IAsyncDisposable
     }
 
     public Task<PaginationPayload<SimplifiedMarket>> GetSamplingSimplifiedMarketsAsync(string nextCursor = PolymarketConstants.InitialCursor, CancellationToken cancellationToken = default) =>
-        SendAsync<PaginationPayload<SimplifiedMarket>>(HttpMethod.Get, ClobEndpoints.GetSamplingSimplifiedMarkets, query: new Dictionary<string, string?> { ["next_cursor"] = nextCursor }, cancellationToken: cancellationToken);
+        GetSamplingSimplifiedMarketsAsync(new MarketQueryParameters { NextCursor = nextCursor }, cancellationToken);
+
+    public Task<PaginationPayload<SimplifiedMarket>> GetSamplingSimplifiedMarketsAsync(MarketQueryParameters queryParameters, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(queryParameters);
+        return SendAsync<PaginationPayload<SimplifiedMarket>>(HttpMethod.Get, ClobEndpoints.GetSamplingSimplifiedMarkets, query: PolymarketQuery.FromMarketQueryParameters(queryParameters), cancellationToken: cancellationToken);
+    }
 
     public Task<PaginationPayload<Market>> GetSamplingMarketsAsync(string nextCursor = PolymarketConstants.InitialCursor, CancellationToken cancellationToken = default) =>
-        SendAsync<PaginationPayload<Market>>(HttpMethod.Get, ClobEndpoints.GetSamplingMarkets, query: new Dictionary<string, string?> { ["next_cursor"] = nextCursor }, cancellationToken: cancellationToken);
+        GetSamplingMarketsAsync(new MarketQueryParameters { NextCursor = nextCursor }, cancellationToken);
+
+    public Task<PaginationPayload<Market>> GetSamplingMarketsAsync(MarketQueryParameters queryParameters, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(queryParameters);
+        return SendAsync<PaginationPayload<Market>>(HttpMethod.Get, ClobEndpoints.GetSamplingMarkets, query: PolymarketQuery.FromMarketQueryParameters(queryParameters), cancellationToken: cancellationToken);
+    }
 
     public Task<PaginationPayload<SimplifiedMarket>> GetSimplifiedMarketsAsync(string nextCursor = PolymarketConstants.InitialCursor, CancellationToken cancellationToken = default) =>
-        SendAsync<PaginationPayload<SimplifiedMarket>>(HttpMethod.Get, ClobEndpoints.GetSimplifiedMarkets, query: new Dictionary<string, string?> { ["next_cursor"] = nextCursor }, cancellationToken: cancellationToken);
+        GetSimplifiedMarketsAsync(new MarketQueryParameters { NextCursor = nextCursor }, cancellationToken);
+
+    public Task<PaginationPayload<SimplifiedMarket>> GetSimplifiedMarketsAsync(MarketQueryParameters queryParameters, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(queryParameters);
+        return SendAsync<PaginationPayload<SimplifiedMarket>>(HttpMethod.Get, ClobEndpoints.GetSimplifiedMarkets, query: PolymarketQuery.FromMarketQueryParameters(queryParameters), cancellationToken: cancellationToken);
+    }
 
     public Task<PaginationPayload<Market>> GetMarketsAsync(string nextCursor = PolymarketConstants.InitialCursor, CancellationToken cancellationToken = default) =>
-        SendAsync<PaginationPayload<Market>>(HttpMethod.Get, ClobEndpoints.GetMarkets, query: new Dictionary<string, string?> { ["next_cursor"] = nextCursor }, cancellationToken: cancellationToken);
+        GetMarketsAsync(new MarketQueryParameters { NextCursor = nextCursor }, cancellationToken);
+
+    public Task<PaginationPayload<Market>> GetMarketsAsync(MarketQueryParameters queryParameters, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(queryParameters);
+        return SendAsync<PaginationPayload<Market>>(HttpMethod.Get, ClobEndpoints.GetMarkets, query: PolymarketQuery.FromMarketQueryParameters(queryParameters), cancellationToken: cancellationToken);
+    }
 
     public Task<Market> GetMarketAsync(string conditionId, CancellationToken cancellationToken = default)
     {

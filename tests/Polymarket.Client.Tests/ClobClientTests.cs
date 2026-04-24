@@ -280,6 +280,75 @@ public sealed class ClobClientTests
     }
 
     [Fact]
+    public async Task MarketListQueryOverloads_SerializeTypedAndAdditionalParameters()
+    {
+        List<HttpRequestMessage> requests = [];
+        using HttpClient httpClient = new(new StubHttpMessageHandler(request =>
+        {
+            requests.Add(request);
+            return request.RequestUri!.AbsolutePath switch
+            {
+                "/markets" or "/simplified-markets" or "/sampling-markets" or "/sampling-simplified-markets"
+                    => CreateJsonResponse("""{"limit":1,"count":0,"next_cursor":"LTE=","data":[]}"""),
+                _ => throw new InvalidOperationException($"Unexpected path {request.RequestUri!.AbsolutePath}."),
+            };
+        }));
+
+        await using ClobClient client = new("https://clob.polymarket.com", Chain.Polygon, httpClient);
+        MarketQueryParameters queryParameters = new()
+        {
+            NextCursor = "MA==",
+            Limit = 1,
+            AdditionalParameters = new Dictionary<string, string?>(StringComparer.Ordinal)
+            {
+                ["active"] = "true",
+            },
+        };
+
+        await client.GetMarketsAsync(queryParameters);
+        await client.GetSimplifiedMarketsAsync(queryParameters);
+        await client.GetSamplingMarketsAsync(queryParameters);
+        await client.GetSamplingSimplifiedMarketsAsync(queryParameters);
+
+        Assert.Collection(
+            requests,
+            request => AssertMarketQuery(request, "/markets", "MA==", "1", "true"),
+            request => AssertMarketQuery(request, "/simplified-markets", "MA==", "1", "true"),
+            request => AssertMarketQuery(request, "/sampling-markets", "MA==", "1", "true"),
+            request => AssertMarketQuery(request, "/sampling-simplified-markets", "MA==", "1", "true"));
+    }
+
+    [Fact]
+    public async Task MarketListNextCursorOverloads_ForwardToTypedQueryParameters()
+    {
+        List<HttpRequestMessage> requests = [];
+        using HttpClient httpClient = new(new StubHttpMessageHandler(request =>
+        {
+            requests.Add(request);
+            return request.RequestUri!.AbsolutePath switch
+            {
+                "/markets" or "/simplified-markets" or "/sampling-markets" or "/sampling-simplified-markets"
+                    => CreateJsonResponse("""{"limit":1,"count":0,"next_cursor":"LTE=","data":[]}"""),
+                _ => throw new InvalidOperationException($"Unexpected path {request.RequestUri!.AbsolutePath}."),
+            };
+        }));
+
+        await using ClobClient client = new("https://clob.polymarket.com", Chain.Polygon, httpClient);
+
+        await client.GetMarketsAsync("MA==");
+        await client.GetSimplifiedMarketsAsync("MA==");
+        await client.GetSamplingMarketsAsync("MA==");
+        await client.GetSamplingSimplifiedMarketsAsync("MA==");
+
+        Assert.Collection(
+            requests,
+            request => AssertMarketQuery(request, "/markets", "MA==", null, null),
+            request => AssertMarketQuery(request, "/simplified-markets", "MA==", null, null),
+            request => AssertMarketQuery(request, "/sampling-markets", "MA==", null, null),
+            request => AssertMarketQuery(request, "/sampling-simplified-markets", "MA==", null, null));
+    }
+
+    [Fact]
     public async Task GetMarketsAsync_ReturnsStronglyTypedMarkets()
     {
         using HttpClient httpClient = new(new StubHttpMessageHandler(request =>
@@ -526,6 +595,51 @@ public sealed class ClobClientTests
         using HMACSHA256 hmac = new(secret);
         byte[] digest = hmac.ComputeHash(Encoding.UTF8.GetBytes(payload));
         return Convert.ToBase64String(digest).Replace('+', '-').Replace('/', '_');
+    }
+
+    private static void AssertMarketQuery(HttpRequestMessage request, string expectedPath, string expectedCursor, string? expectedLimit, string? expectedActive)
+    {
+        Assert.Equal(expectedPath, request.RequestUri!.AbsolutePath);
+
+        Dictionary<string, string?> query = ParseQuery(request.RequestUri.Query);
+        Assert.Equal(expectedCursor, query["next_cursor"]);
+
+        if (expectedLimit is null)
+        {
+            Assert.False(query.ContainsKey("limit"));
+        }
+        else
+        {
+            Assert.Equal(expectedLimit, query["limit"]);
+        }
+
+        if (expectedActive is null)
+        {
+            Assert.False(query.ContainsKey("active"));
+        }
+        else
+        {
+            Assert.Equal(expectedActive, query["active"]);
+        }
+    }
+
+    private static Dictionary<string, string?> ParseQuery(string query)
+    {
+        Dictionary<string, string?> result = new(StringComparer.Ordinal);
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return result;
+        }
+
+        foreach (string part in query.TrimStart('?').Split('&', StringSplitOptions.RemoveEmptyEntries))
+        {
+            string[] pair = part.Split('=', 2);
+            string key = Uri.UnescapeDataString(pair[0]);
+            string? value = pair.Length > 1 ? Uri.UnescapeDataString(pair[1]) : null;
+            result[key] = value;
+        }
+
+        return result;
     }
 
     private sealed class StubHttpMessageHandler(Func<HttpRequestMessage, HttpResponseMessage> responseFactory) : HttpMessageHandler

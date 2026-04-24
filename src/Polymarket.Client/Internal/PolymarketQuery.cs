@@ -47,6 +47,24 @@ internal static class PolymarketQuery
         return query;
     }
 
+    public static Dictionary<string, string?> FromMarketQueryParameters(MarketQueryParameters? parameters)
+    {
+        Dictionary<string, string?> query = [];
+        if (parameters is null)
+        {
+            return query;
+        }
+
+        foreach ((string key, string? value) in parameters.AdditionalParameters)
+        {
+            query[key] = value;
+        }
+
+        query["next_cursor"] = parameters.NextCursor;
+        query["limit"] = parameters.Limit?.ToString(CultureInfo.InvariantCulture);
+        return query;
+    }
+
     public static Dictionary<string, string?> FromOpenOrderParameters(OpenOrderParameters? parameters)
     {
         Dictionary<string, string?> query = [];

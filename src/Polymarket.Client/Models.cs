@@ -246,6 +246,17 @@ public sealed record PaginationPayload<T>(
     [property: JsonPropertyName("next_cursor")] string NextCursor,
     [property: JsonPropertyName("data")] IReadOnlyList<T> Data);
 
+public sealed record MarketQueryParameters
+{
+    [JsonPropertyName("next_cursor")]
+    public string? NextCursor { get; init; }
+
+    [JsonPropertyName("limit")]
+    public int? Limit { get; init; }
+
+    public IReadOnlyDictionary<string, string?> AdditionalParameters { get; init; } = new Dictionary<string, string?>(StringComparer.Ordinal);
+}
+
 public sealed record BookParameters(
     [property: JsonPropertyName("token_id")] string TokenId,
     [property: JsonPropertyName("side")] Side? Side = null);
