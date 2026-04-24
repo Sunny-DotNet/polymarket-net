@@ -16,6 +16,7 @@ internal static class PolymarketJson
 
     static PolymarketJson()
     {
+        Options.Converters.Add(new ApiOperationResultJsonConverter());
         Options.Converters.Add(new SideJsonConverter());
         Options.Converters.Add(new OrderTypeJsonConverter());
         Options.Converters.Add(new AssetTypeJsonConverter());
@@ -147,4 +148,88 @@ internal sealed class PriceHistoryIntervalJsonConverter : JsonConverter<PriceHis
 
     public override void Write(Utf8JsonWriter writer, PriceHistoryInterval value, JsonSerializerOptions options) =>
         writer.WriteStringValue(value.ToApiString());
+}
+
+internal sealed class ApiOperationResultJsonConverter : JsonConverter<ApiOperationResult>
+{
+    public override ApiOperationResult Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        return reader.TokenType switch
+        {
+            JsonTokenType.True or JsonTokenType.False => new ApiOperationResult
+            {
+                Success = reader.GetBoolean(),
+            },
+            JsonTokenType.StartObject => ReadObject(ref reader, options),
+            JsonTokenType.Null => new ApiOperationResult(),
+            _ => throw new JsonException($"Unsupported token {reader.TokenType} for {nameof(ApiOperationResult)}."),
+        };
+    }
+
+    public override void Write(Utf8JsonWriter writer, ApiOperationResult value, JsonSerializerOptions options)
+    {
+        writer.WriteStartObject();
+
+        if (value.Success.HasValue)
+        {
+            writer.WriteBoolean("success", value.Success.Value);
+        }
+
+        if (value.Status is not null)
+        {
+            writer.WriteString("status", value.Status);
+        }
+
+        if (value.Message is not null)
+        {
+            writer.WriteString("message", value.Message);
+        }
+
+        if (value.Error is not null)
+        {
+            writer.WriteString("error", value.Error);
+        }
+
+        foreach ((string key, JsonElement element) in value.ExtensionData)
+        {
+            writer.WritePropertyName(key);
+            element.WriteTo(writer);
+        }
+
+        writer.WriteEndObject();
+    }
+
+    private static ApiOperationResult ReadObject(ref Utf8JsonReader reader, JsonSerializerOptions options)
+    {
+        using JsonDocument document = JsonDocument.ParseValue(ref reader);
+        ApiOperationResultObject payload = JsonSerializer.Deserialize<ApiOperationResultObject>(document.RootElement.GetRawText(), options)
+            ?? throw new JsonException($"Failed to deserialize {nameof(ApiOperationResult)}.");
+
+        return new ApiOperationResult
+        {
+            Success = payload.Success,
+            Status = payload.Status,
+            Message = payload.Message,
+            Error = payload.Error,
+            ExtensionData = payload.ExtensionData,
+        };
+    }
+
+    private sealed record ApiOperationResultObject
+    {
+        [JsonPropertyName("success")]
+        public bool? Success { get; init; }
+
+        [JsonPropertyName("status")]
+        public string? Status { get; init; }
+
+        [JsonPropertyName("message")]
+        public string? Message { get; init; }
+
+        [JsonPropertyName("error")]
+        public string? Error { get; init; }
+
+        [JsonExtensionData]
+        public Dictionary<string, JsonElement> ExtensionData { get; init; } = [];
+    }
 }

@@ -293,22 +293,12 @@ public sealed class ClobClient : IDisposable, IAsyncDisposable
 
     public async Task<ApiCredentials> CreateApiKeyAsync(long? nonce = null, CancellationToken cancellationToken = default)
     {
-        EnsureL1Auth();
-        Dictionary<string, string> headers = await CreateLevel1HeadersAsync(nonce, cancellationToken).ConfigureAwait(false);
-        ApiCredentialsRaw raw = await SendAsync<ApiCredentialsRaw>(HttpMethod.Post, ClobEndpoints.CreateApiKey, headers: headers, cancellationToken: cancellationToken).ConfigureAwait(false);
-        ApiCredentials apiCredentials = new(raw.ApiKey, raw.Secret, raw.Passphrase);
-        SetApiCredentials(apiCredentials);
-        return apiCredentials;
+        return await SendApiCredentialsAsync(HttpMethod.Post, ClobEndpoints.CreateApiKey, nonce, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<ApiCredentials> DeriveApiKeyAsync(long? nonce = null, CancellationToken cancellationToken = default)
     {
-        EnsureL1Auth();
-        Dictionary<string, string> headers = await CreateLevel1HeadersAsync(nonce, cancellationToken).ConfigureAwait(false);
-        ApiCredentialsRaw raw = await SendAsync<ApiCredentialsRaw>(HttpMethod.Get, ClobEndpoints.DeriveApiKey, headers: headers, cancellationToken: cancellationToken).ConfigureAwait(false);
-        ApiCredentials apiCredentials = new(raw.ApiKey, raw.Secret, raw.Passphrase);
-        SetApiCredentials(apiCredentials);
-        return apiCredentials;
+        return await SendApiCredentialsAsync(HttpMethod.Get, ClobEndpoints.DeriveApiKey, nonce, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<ApiCredentials> CreateOrDeriveApiKeyAsync(long? nonce = null, CancellationToken cancellationToken = default)
@@ -319,46 +309,30 @@ public sealed class ClobClient : IDisposable, IAsyncDisposable
             : created;
     }
 
-    public async Task<ApiKeysResponse> GetApiKeysAsync(CancellationToken cancellationToken = default)
-    {
-        EnsureL2Auth();
-        Dictionary<string, string> headers = await CreateLevel2HeadersAsync(HttpMethod.Get, ClobEndpoints.GetApiKeys, null, cancellationToken).ConfigureAwait(false);
-        return await SendAsync<ApiKeysResponse>(HttpMethod.Get, ClobEndpoints.GetApiKeys, headers: headers, cancellationToken: cancellationToken).ConfigureAwait(false);
-    }
+    public Task<ApiKeysResponse> GetApiKeysAsync(CancellationToken cancellationToken = default) =>
+        SendAuthedAsync<ApiKeysResponse>(HttpMethod.Get, ClobEndpoints.GetApiKeys, cancellationToken: cancellationToken);
 
-    public async Task<BanStatus> GetClosedOnlyModeAsync(CancellationToken cancellationToken = default)
-    {
-        EnsureL2Auth();
-        Dictionary<string, string> headers = await CreateLevel2HeadersAsync(HttpMethod.Get, ClobEndpoints.ClosedOnly, null, cancellationToken).ConfigureAwait(false);
-        return await SendAsync<BanStatus>(HttpMethod.Get, ClobEndpoints.ClosedOnly, headers: headers, cancellationToken: cancellationToken).ConfigureAwait(false);
-    }
+    public Task<BanStatus> GetClosedOnlyModeAsync(CancellationToken cancellationToken = default) =>
+        SendAuthedAsync<BanStatus>(HttpMethod.Get, ClobEndpoints.ClosedOnly, cancellationToken: cancellationToken);
 
-    public async Task<DynamicPayload> DeleteApiKeyAsync(CancellationToken cancellationToken = default)
-    {
-        EnsureL2Auth();
-        Dictionary<string, string> headers = await CreateLevel2HeadersAsync(HttpMethod.Delete, ClobEndpoints.DeleteApiKey, null, cancellationToken).ConfigureAwait(false);
-        return await SendAsync<DynamicPayload>(HttpMethod.Delete, ClobEndpoints.DeleteApiKey, headers: headers, cancellationToken: cancellationToken).ConfigureAwait(false);
-    }
+    public Task<ApiOperationResult> DeleteApiKeyAsync(CancellationToken cancellationToken = default) =>
+        SendAuthedAsync<ApiOperationResult>(HttpMethod.Delete, ClobEndpoints.DeleteApiKey, cancellationToken: cancellationToken);
 
     public async Task<ReadonlyApiKeyResponse> CreateReadonlyApiKeyAsync(long? nonce = null, CancellationToken cancellationToken = default)
     {
-        EnsureL1Auth();
-        Dictionary<string, string> headers = await CreateLevel1HeadersAsync(nonce, cancellationToken).ConfigureAwait(false);
-        return await SendAsync<ReadonlyApiKeyResponse>(HttpMethod.Post, ClobEndpoints.CreateReadonlyApiKey, headers: headers, cancellationToken: cancellationToken).ConfigureAwait(false);
+        return await SendLevel1Async<ReadonlyApiKeyResponse>(HttpMethod.Post, ClobEndpoints.CreateReadonlyApiKey, nonce, cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task<IReadOnlyList<ReadonlyApiKeyResponse>> GetReadonlyApiKeysAsync(CancellationToken cancellationToken = default)
-    {
-        EnsureL2Auth();
-        Dictionary<string, string> headers = await CreateLevel2HeadersAsync(HttpMethod.Get, ClobEndpoints.GetReadonlyApiKeys, null, cancellationToken).ConfigureAwait(false);
-        return await SendAsync<IReadOnlyList<ReadonlyApiKeyResponse>>(HttpMethod.Get, ClobEndpoints.GetReadonlyApiKeys, headers: headers, cancellationToken: cancellationToken).ConfigureAwait(false);
-    }
+    public Task<IReadOnlyList<ReadonlyApiKeyResponse>> GetReadonlyApiKeysAsync(CancellationToken cancellationToken = default) =>
+        SendAuthedAsync<IReadOnlyList<ReadonlyApiKeyResponse>>(HttpMethod.Get, ClobEndpoints.GetReadonlyApiKeys, cancellationToken: cancellationToken);
 
-    public async Task<DynamicPayload> DeleteReadonlyApiKeyAsync(CancellationToken cancellationToken = default)
+    public Task<ApiOperationResult> DeleteReadonlyApiKeyAsync(CancellationToken cancellationToken = default) =>
+        DeleteReadonlyApiKeyAsync(key: null, cancellationToken);
+
+    public Task<ApiOperationResult> DeleteReadonlyApiKeyAsync(string? key, CancellationToken cancellationToken = default)
     {
-        EnsureL2Auth();
-        Dictionary<string, string> headers = await CreateLevel2HeadersAsync(HttpMethod.Delete, ClobEndpoints.DeleteReadonlyApiKey, null, cancellationToken).ConfigureAwait(false);
-        return await SendAsync<DynamicPayload>(HttpMethod.Delete, ClobEndpoints.DeleteReadonlyApiKey, headers: headers, cancellationToken: cancellationToken).ConfigureAwait(false);
+        DeleteReadonlyApiKeyRequest? payload = string.IsNullOrWhiteSpace(key) ? null : new DeleteReadonlyApiKeyRequest(key);
+        return SendAuthedAsync<ApiOperationResult>(HttpMethod.Delete, ClobEndpoints.DeleteReadonlyApiKey, payload, cancellationToken: cancellationToken);
     }
 
     public async Task<SignedOrderBase> CreateOrderAsync(OrderArgumentsV1 orderArguments, PartialCreateOrderOptions? options = null, CancellationToken cancellationToken = default)
@@ -552,11 +526,10 @@ public sealed class ClobClient : IDisposable, IAsyncDisposable
         return await GetAllPagesAsync<OpenOrder>(ClobEndpoints.GetPreMigrationOrders, null, headers, onlyFirstPage, nextCursor, cancellationToken).ConfigureAwait(false);
     }
 
-    public Task<DynamicPayload> GetOrderAsync(string orderId, CancellationToken cancellationToken = default)
+    public Task<OpenOrder> GetOrderAsync(string orderId, CancellationToken cancellationToken = default)
     {
-        EnsureL2Auth();
         ArgumentException.ThrowIfNullOrWhiteSpace(orderId);
-        return SendAuthedDynamicAsync(HttpMethod.Get, $"{ClobEndpoints.GetOrder}{orderId}", null, null, cancellationToken);
+        return SendAuthedAsync<OpenOrder>(HttpMethod.Get, $"{ClobEndpoints.GetOrder}{orderId}", cancellationToken: cancellationToken);
     }
 
     public async Task<IReadOnlyList<Trade>> GetTradesAsync(TradeParameters? parameters = null, bool onlyFirstPage = false, string? nextCursor = null, CancellationToken cancellationToken = default)
@@ -735,14 +708,26 @@ public sealed class ClobClient : IDisposable, IAsyncDisposable
         return await SendAsync<T>(method, endpoint, body, headers, query, cancellationToken).ConfigureAwait(false);
     }
 
+    private async Task<T> SendLevel1Async<T>(HttpMethod method, string endpoint, long? nonce = null, object? body = null, CancellationToken cancellationToken = default)
+    {
+        EnsureL1Auth();
+        Dictionary<string, string> headers = await CreateLevel1HeadersAsync(nonce, cancellationToken).ConfigureAwait(false);
+        return await SendAsync<T>(method, endpoint, body, headers, cancellationToken: cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<ApiCredentials> SendApiCredentialsAsync(HttpMethod method, string endpoint, long? nonce, CancellationToken cancellationToken)
+    {
+        ApiCredentialsRaw raw = await SendLevel1Async<ApiCredentialsRaw>(method, endpoint, nonce, cancellationToken: cancellationToken).ConfigureAwait(false);
+        ApiCredentials apiCredentials = new(raw.ApiKey, raw.Secret, raw.Passphrase);
+        SetApiCredentials(apiCredentials);
+        return apiCredentials;
+    }
+
     private async Task<JsonElement> SendAuthedJsonAsync(HttpMethod method, string endpoint, object? body, CancellationToken cancellationToken)
     {
         JsonElement response = await SendAuthedAsync<JsonElement>(method, endpoint, body, cancellationToken: cancellationToken).ConfigureAwait(false);
         return HandleJsonResponse(response);
     }
-
-    private Task<DynamicPayload> SendAuthedDynamicAsync(HttpMethod method, string endpoint, object? body = null, IReadOnlyDictionary<string, string?>? query = null, CancellationToken cancellationToken = default) =>
-        SendAuthedAsync<DynamicPayload>(method, endpoint, body, query, cancellationToken);
 
     private async Task<IReadOnlyList<T>> GetPublicPagedAsync<T>(string endpoint, CancellationToken cancellationToken)
     {

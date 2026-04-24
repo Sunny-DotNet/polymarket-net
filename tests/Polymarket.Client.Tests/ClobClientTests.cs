@@ -98,6 +98,87 @@ public sealed class ClobClientTests
     }
 
     [Fact]
+    public async Task DeleteApiKeyAsync_ParsesStructuredResponse()
+    {
+        byte[] secretBytes = Encoding.UTF8.GetBytes("secret-for-tests");
+        string apiSecret = Convert.ToBase64String(secretBytes).Replace('+', '-').Replace('/', '_');
+        HttpRequestMessage? deleteRequest = null;
+
+        using HttpClient httpClient = new(new StubHttpMessageHandler(request =>
+        {
+            return request.RequestUri!.AbsolutePath switch
+            {
+                "/time" => CreateJsonResponse("""{"time":1713929974}"""),
+                "/auth/api-key" => Capture(request, """{"success":true,"status":"ok","message":"deleted"}""", out deleteRequest),
+                _ => throw new InvalidOperationException($"Unexpected path {request.RequestUri!.AbsolutePath}."),
+            };
+        }));
+
+        ClobClientOptions options = new()
+        {
+            Host = new Uri("https://clob.polymarket.com"),
+            Chain = Chain.Polygon,
+            PrivateKey = KnownPrivateKey,
+            Credentials = new ApiCredentials("key-1", apiSecret, "pass-1"),
+            UseServerTime = true,
+        };
+
+        await using ClobClient client = new(options, httpClient);
+        ApiOperationResult response = await client.DeleteApiKeyAsync();
+
+        Assert.True(response.Success);
+        Assert.Equal("ok", response.Status);
+        Assert.Equal("deleted", response.Message);
+        Assert.NotNull(deleteRequest);
+        Assert.Equal(
+            ComputeExpectedHmac(apiSecret, 1713929974, "DELETE", "/auth/api-key", null),
+            deleteRequest!.Headers.GetValues("POLY_SIGNATURE").Single());
+    }
+
+    [Fact]
+    public async Task DeleteReadonlyApiKeyAsync_SendsKeyPayload_AndParsesBooleanResponse()
+    {
+        const string keyToDelete = "readonly-key";
+        byte[] secretBytes = Encoding.UTF8.GetBytes("secret-for-tests");
+        string apiSecret = Convert.ToBase64String(secretBytes).Replace('+', '-').Replace('/', '_');
+        HttpRequestMessage? deleteRequest = null;
+        string? requestBody = null;
+
+        using HttpClient httpClient = new(new StubHttpMessageHandler(request =>
+        {
+            return request.RequestUri!.AbsolutePath switch
+            {
+                "/time" => CreateJsonResponse("""{"time":1713929974}"""),
+                "/auth/readonly-api-key" => Capture(
+                    request,
+                    "true",
+                    out deleteRequest,
+                    capturedBody: requestBody = request.Content?.ReadAsStringAsync().GetAwaiter().GetResult()),
+                _ => throw new InvalidOperationException($"Unexpected path {request.RequestUri!.AbsolutePath}."),
+            };
+        }));
+
+        ClobClientOptions options = new()
+        {
+            Host = new Uri("https://clob.polymarket.com"),
+            Chain = Chain.Polygon,
+            PrivateKey = KnownPrivateKey,
+            Credentials = new ApiCredentials("key-1", apiSecret, "pass-1"),
+            UseServerTime = true,
+        };
+
+        await using ClobClient client = new(options, httpClient);
+        ApiOperationResult response = await client.DeleteReadonlyApiKeyAsync(keyToDelete);
+
+        Assert.True(response.Success);
+        Assert.Equal("""{"key":"readonly-key"}""", requestBody);
+        Assert.NotNull(deleteRequest);
+        Assert.Equal(
+            ComputeExpectedHmac(apiSecret, 1713929974, "DELETE", "/auth/readonly-api-key", requestBody),
+            deleteRequest!.Headers.GetValues("POLY_SIGNATURE").Single());
+    }
+
+    [Fact]
     public async Task CreateOrderAsync_ReturnsSignedOrderV2()
     {
         using HttpClient httpClient = new(new StubHttpMessageHandler(request =>
@@ -154,6 +235,48 @@ public sealed class ClobClientTests
 
         Assert.Equal(expectedHash, hash);
         Assert.Equal("existing", orderBook.Hash);
+    }
+
+    [Fact]
+    public async Task GetOrderAsync_ReturnsStronglyTypedOrder()
+    {
+        byte[] secretBytes = Encoding.UTF8.GetBytes("secret-for-tests");
+        string apiSecret = Convert.ToBase64String(secretBytes).Replace('+', '-').Replace('/', '_');
+        HttpRequestMessage? getOrderRequest = null;
+
+        using HttpClient httpClient = new(new StubHttpMessageHandler(request =>
+        {
+            return request.RequestUri!.AbsolutePath switch
+            {
+                "/time" => CreateJsonResponse("""{"time":1713929974}"""),
+                "/data/order/o1" => Capture(
+                    request,
+                    """{"id":"o1","status":"LIVE","owner":"0x1","maker_address":"0x2","market":"c1","asset_id":"t1","side":"BUY","original_size":"10","size_matched":"2","price":"0.45","associate_trades":["tr1"],"outcome":"Yes","created_at":1713929000,"expiration":"0","order_type":"GTC"}""",
+                    out getOrderRequest),
+                _ => throw new InvalidOperationException($"Unexpected path {request.RequestUri!.AbsolutePath}."),
+            };
+        }));
+
+        ClobClientOptions options = new()
+        {
+            Host = new Uri("https://clob.polymarket.com"),
+            Chain = Chain.Polygon,
+            PrivateKey = KnownPrivateKey,
+            Credentials = new ApiCredentials("key-1", apiSecret, "pass-1"),
+            UseServerTime = true,
+        };
+
+        await using ClobClient client = new(options, httpClient);
+        OpenOrder order = await client.GetOrderAsync("o1");
+
+        Assert.Equal("o1", order.Id);
+        Assert.Equal("LIVE", order.Status);
+        Assert.Equal("t1", order.AssetId);
+        Assert.Equal("GTC", order.OrderType);
+        Assert.NotNull(getOrderRequest);
+        Assert.Equal(
+            ComputeExpectedHmac(apiSecret, 1713929974, "GET", "/data/order/o1", null),
+            getOrderRequest!.Headers.GetValues("POLY_SIGNATURE").Single());
     }
 
     [Fact]
@@ -374,7 +497,7 @@ public sealed class ClobClientTests
             Content = new StringContent(json, Encoding.UTF8, "application/json"),
         };
 
-    private static HttpResponseMessage Capture(HttpRequestMessage request, string json, out HttpRequestMessage capturedRequest)
+    private static HttpResponseMessage Capture(HttpRequestMessage request, string json, out HttpRequestMessage capturedRequest, string? capturedBody = null)
     {
         capturedRequest = request;
         return CreateJsonResponse(json);

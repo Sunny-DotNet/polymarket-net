@@ -53,6 +53,25 @@ public sealed record DynamicPayload
     public Dictionary<string, JsonElement> Data { get; init; } = [];
 }
 
+[JsonConverter(typeof(Internal.ApiOperationResultJsonConverter))]
+public sealed record ApiOperationResult
+{
+    [JsonPropertyName("success")]
+    public bool? Success { get; init; }
+
+    [JsonPropertyName("status")]
+    public string? Status { get; init; }
+
+    [JsonPropertyName("message")]
+    public string? Message { get; init; }
+
+    [JsonPropertyName("error")]
+    public string? Error { get; init; }
+
+    [JsonExtensionData]
+    public Dictionary<string, JsonElement> ExtensionData { get; init; } = [];
+}
+
 public sealed record MarketRewards
 {
     [JsonPropertyName("rates")]
@@ -598,6 +617,9 @@ public sealed record BuilderTrade(
 
 public sealed record ReadonlyApiKeyResponse(
     [property: JsonPropertyName("apiKey")] string ApiKey);
+
+public sealed record DeleteReadonlyApiKeyRequest(
+    [property: JsonPropertyName("key")] string Key);
 
 public sealed record MarketTradeEventMarket(
     [property: JsonPropertyName("condition_id")] string ConditionId,
