@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <Description>.NET SDK for the Polymarket CLOB API.</Description>
+    <Description>.NET SDK for the Polymarket CLOB, Gamma, and websocket APIs.</Description>
     <PackageId>Polymarket.Client</PackageId>
-    <PackageTags>polymarket;clob;sdk</PackageTags>
+    <PackageTags>polymarket;clob;gamma;websocket;sdk</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

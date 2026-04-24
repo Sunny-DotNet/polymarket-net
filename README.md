@@ -4,11 +4,13 @@
 
 ---
 
-`Polymarket.Client` is a .NET SDK for the Polymarket CLOB API.
+`Polymarket.Client` is a .NET SDK for the Polymarket CLOB and Gamma APIs.
 
-The current SDK covers the main CLOB client surface:
+The current SDK covers the main CLOB client surface and the public Gamma content/discovery surface:
 
 - public health, version, time, markets, order books, price, spread, trade price, and price history endpoints
+- public Gamma status, teams, tags, events, markets, series, comments, profiles, sports, and search endpoints
+- websocket sessions for market, user, and sports channels via `ClobWebSocketClient`
 - L1 wallet auth for API key creation/derivation
 - L2 HMAC auth for account, trades, notifications, balance allowance, rewards, builder API keys, and order endpoints
 - V1/V2 order creation, market order creation, posting, cancellation, scoring, and order book hashing
@@ -51,6 +53,51 @@ PaginationPayload<Market> markets = await client.GetMarketsAsync(new MarketQuery
 OrderBookSummary book = await client.GetOrderBookAsync("TOKEN_ID");
 ```
 
+Gamma usage:
+
+```csharp
+using Polymarket.Client;
+
+await using GammaClient gammaClient = new("https://gamma-api.polymarket.com");
+
+string status = await gammaClient.GetStatusAsync();
+IReadOnlyList<GammaMarket> gammaMarkets = await gammaClient.GetMarketsAsync(new GammaMarketQueryParameters
+{
+    Limit = 20,
+    Closed = false,
+    IncludeTag = true,
+});
+
+GammaSearchResponse search = await gammaClient.PublicSearchAsync(new GammaPublicSearchQueryParameters
+{
+    Query = "election",
+    SearchTags = true,
+    SearchProfiles = true,
+});
+```
+
+WebSocket usage:
+
+```csharp
+using Polymarket.Client;
+
+ClobWebSocketClient webSocketClient = new();
+
+await using ClobMarketWebSocketSession session = await webSocketClient.ConnectMarketAsync(
+    new ClobMarketSubscriptionRequest
+    {
+        AssetIds = ["YES_TOKEN_ID", "NO_TOKEN_ID"],
+        InitialDump = true,
+        Level = ClobMarketSubscriptionLevel.Level2,
+        CustomFeatureEnabled = true,
+    });
+
+await foreach (ClobMarketChannelMessage message in session.ReadAllAsync())
+{
+    Console.WriteLine(message.EventType);
+}
+```
+
 Authenticated usage:
 
 ```csharp
@@ -82,7 +129,17 @@ JsonElement postResult = await authedClient.PostOrderAsync(order);
 - Package ID: `Polymarket.Client`
 - Target framework: `.NET 10`
 - Naming follows .NET conventions while keeping the official SDK surface recognizable
+- `ClobClient` targets trading/CLOB endpoints, while `GammaClient` targets catalog/content endpoints
+- `ClobWebSocketClient` targets realtime market, user, and sports websocket sessions
 - `HttpClient` is injectable for tests and custom hosting scenarios
+
+## Console sample
+
+The console sample now demonstrates **Gamma discovery + CLOB websocket streaming** for the latest BTC 5-minute market:
+
+```powershell
+dotnet run --project examples\Polymarket.Client.ConsoleApp\Polymarket.Client.ConsoleApp.csproj
+```
 
 ## Release automation
 
