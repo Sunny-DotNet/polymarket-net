@@ -15,6 +15,26 @@ Console.WriteLine($"CLOB version: {await clobClient.GetVersionAsync()}");
 Console.WriteLine($"CLOB server time: {await clobClient.GetServerTimeAsync()}");
 Console.WriteLine($"Gamma status: {await gammaClient.GetStatusAsync()}");
 
+
+
+//104272深圳,102923香港，104590广州
+
+var events = await gammaClient.GetEventsAsync(new GammaEventQueryParameters
+{
+    TagSlug = ["highest-temperature"],
+    TagId = [104272, 102923, 104590],
+    Active = true,
+    Closed = false,
+    Order = "endDate",
+    Limit = 100,
+    Ascending = false
+});
+
+
+
+
+
+
 if (!string.IsNullOrWhiteSpace(privateKey))
 {
     ClobClientOptions options = new()

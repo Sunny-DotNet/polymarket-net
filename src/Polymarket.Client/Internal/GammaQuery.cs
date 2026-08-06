@@ -85,10 +85,10 @@ internal static class GammaQuery
 
         AddPagination(query, parameters);
         AddMany(query, "id", parameters.Id);
-        AddValue(query, "tag_id", parameters.TagId);
+        AddMany(query, "tag_id", parameters.TagId);
         AddMany(query, "exclude_tag_id", parameters.ExcludeTagId);
         AddMany(query, "slug", parameters.Slug);
-        AddValue(query, "tag_slug", parameters.TagSlug);
+        AddMany(query, "tag_slug", parameters.TagSlug);
         AddValue(query, "related_tags", parameters.RelatedTags);
         AddValue(query, "active", parameters.Active);
         AddValue(query, "archived", parameters.Archived);

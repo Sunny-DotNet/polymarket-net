@@ -74,7 +74,7 @@ public sealed record GammaEventQueryParameters : GammaPaginationQueryParameters
     public IReadOnlyList<long> Id { get; init; } = [];
 
     [JsonPropertyName("tag_id")]
-    public long? TagId { get; init; }
+    public IReadOnlyList<long> TagId { get; init; } = [];
 
     [JsonPropertyName("exclude_tag_id")]
     public IReadOnlyList<long> ExcludeTagId { get; init; } = [];
@@ -83,7 +83,7 @@ public sealed record GammaEventQueryParameters : GammaPaginationQueryParameters
     public IReadOnlyList<string> Slug { get; init; } = [];
 
     [JsonPropertyName("tag_slug")]
-    public string? TagSlug { get; init; }
+    public IReadOnlyList<string> TagSlug { get; init; } = [];
 
     [JsonPropertyName("related_tags")]
     public bool? RelatedTags { get; init; }
