@@ -5,6 +5,8 @@ namespace Polymarket.Client;
 
 public record GammaQueryParameters
 {
+    [JsonPropertyName("locale")]
+    public string? Locale { get; init; }
     public IReadOnlyDictionary<string, string?> AdditionalParameters { get; init; } = new Dictionary<string, string?>(StringComparer.Ordinal);
 }
 
@@ -307,8 +309,6 @@ public sealed record GammaMarketKeysetQueryParameters : GammaKeysetQueryParamete
     [JsonPropertyName("include_tag")]
     public bool? IncludeTag { get; init; }
 
-    [JsonPropertyName("locale")]
-    public string? Locale { get; init; }
 }
 
 public sealed record GammaEventKeysetQueryParameters : GammaKeysetQueryParameters
@@ -417,9 +417,6 @@ public sealed record GammaEventKeysetQueryParameters : GammaKeysetQueryParameter
 
     [JsonPropertyName("include_best_lines")]
     public bool? IncludeBestLines { get; init; }
-
-    [JsonPropertyName("locale")]
-    public string? Locale { get; init; }
 }
 
 public sealed record GammaSeriesQueryParameters : GammaPaginationQueryParameters

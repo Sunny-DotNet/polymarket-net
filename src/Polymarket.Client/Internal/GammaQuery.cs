@@ -211,7 +211,6 @@ internal static class GammaQuery
         AddValue(query, "game_id", parameters.GameId);
         AddMany(query, "sports_market_types", parameters.SportsMarketTypes);
         AddValue(query, "include_tag", parameters.IncludeTag);
-        AddValue(query, "locale", parameters.Locale);
         AddAdditional(query, parameters);
         return query;
     }
@@ -260,7 +259,6 @@ internal static class GammaQuery
         AddValue(query, "include_chat", parameters.IncludeChat);
         AddValue(query, "include_template", parameters.IncludeTemplate);
         AddValue(query, "include_best_lines", parameters.IncludeBestLines);
-        AddValue(query, "locale", parameters.Locale);
         AddAdditional(query, parameters);
         return query;
     }
@@ -375,6 +373,7 @@ internal static class GammaQuery
 
     private static void AddAdditional(List<KeyValuePair<string, string?>> query, GammaQueryParameters parameters)
     {
+        AddValue(query, "locale", parameters.Locale);
         foreach ((string key, string? value) in parameters.AdditionalParameters)
         {
             AddValue(query, key, value);

@@ -27,7 +27,8 @@ var events = await gammaClient.GetEventsAsync(new GammaEventQueryParameters
     Closed = false,
     Order = "endDate",
     Limit = 100,
-    Ascending = false
+    Ascending = false,
+    Locale="zh"
 });
 
 
